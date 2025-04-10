@@ -1,0 +1,20 @@
+# Caching
+__pycache__/
+f1_cache/
+
+# Data and models
+data/raw/
+data/processed/
+models/
+
+# Notebooks
+*.ipynb_checkpoints/
+
+# System
+.DS_Store
+.env
+
+# pyenv
+.python-version
+.venv/
+venv/
