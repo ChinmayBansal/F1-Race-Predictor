@@ -7,6 +7,7 @@ from src.data_collection import get_race_data
 from src.preprocessing import create_lstm_sequences
 from src.preprocessing import normalize_lstm_data
 from src.model_lstm import train_lstm_model, prepare_driver_sequence
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
 
 
@@ -53,8 +54,29 @@ for name in sorted(predict_df["Name"].unique()):
 
 # -------- Rank Results -------- #
 predictions.sort(key=lambda x: x[1])
+print("\n📊 Ranked Predictions:")
 for i, (name, time) in enumerate(predictions, 1):
     print(f"{i:>2}. {name:20s} → {time:.3f} sec")
+
+# Compare to actuals (if available)
+actuals = predict_df[predict_df["Round"] == predict_round][["Name", "BestLapTime"]].dropna()
+
+# Join predicted + actual
+results_df = pd.DataFrame(predictions, columns=["Name", "PredictedTime"])
+results_df = results_df.merge(actuals, on="Name", how="inner")
+
+# Calculate metrics
+y_true = results_df["BestLapTime"].values
+y_pred = results_df["PredictedTime"].values
+
+mae = mean_absolute_error(y_true, y_pred)
+rmse = np.sqrt(mean_squared_error(y_true, y_pred))
+r2 = r2_score(y_true, y_pred)
+
+print("\n✅ Model Evaluation on 2025 Saudi Arabian GP:")
+print(f"Mean Absolute Error (MAE):     {mae:.3f} sec")
+print(f"Root Mean Squared Error (RMSE): {rmse:.3f} sec")
+print(f"R² Score:                        {r2:.3f}")
 
 # -------- Optional Plot -------- #
 names_sorted, times_sorted = zip(*predictions)
